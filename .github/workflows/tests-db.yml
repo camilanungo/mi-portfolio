@@ -1,0 +1,20 @@
+name: Tests base de datos
+
+on:
+  push:
+    branches: [main]        # cada vez que Lovable guarda un cambio
+  schedule:
+    - cron: '0 6 * * *'     # y una vez al día, por si cambias algo en Supabase
+  workflow_dispatch:        # botón para lanzarlo a mano
+
+jobs:
+  tests-db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar cliente de PostgreSQL
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Ejecutar los 13 tests
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/db/tests.sql
